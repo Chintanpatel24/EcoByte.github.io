@@ -1,0 +1,857 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Wattwatch Dashboard - Dynamic & Interactive</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+    }
+    /* Custom scrollbar for sidebar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #4b5563;
+      border-radius: 3px;
+    }
+    /* Speedometer style */
+    .speedometer {
+      width: 80px;
+      height: 80px;
+      position: relative;
+    }
+    .speedometer svg {
+      transform: rotate(-90deg);
+    }
+    .speedometer .needle {
+      transform-origin: 40px 40px;
+      transition: transform 0.5s ease-out;
+      stroke: #f97316;
+      stroke-width: 2;
+    }
+    .speedometer .center-circle {
+      fill: #f97316;
+    }
+  </style>
+</head>
+<body class="bg-[#2B2D42] text-white min-h-screen flex">
+  <!-- Sidebar -->
+  <aside
+    aria-label="Sidebar"
+    class="flex flex-col bg-[#1F2136] w-56 p-6 space-y-8 select-none"
+  >
+    <div class="flex items-center space-x-2 cursor-pointer" id="nav-Wattwatch">
+      <img
+        alt="Wattwatch logo white letter W on dark background"
+        class="w-6 h-6"
+        height="24"
+        src="https://storage.googleapis.com/a1aa/image/4fa016b6-2c82-4343-13a7-1b3188aceeb3.jpg"
+        width="24"
+      />
+      <span class="text-white font-semibold text-lg tracking-wide">Wattwatch</span>
+    </div>
+    <nav class="flex flex-col space-y-3 text-sm font-semibold" id="sidebar-nav">
+      <button
+        aria-current="page"
+        class="flex items-center space-x-3 bg-[#F97316] rounded px-3 py-2 w-full text-white nav-btn"
+        data-section="dashboard"
+      >
+        <i class="fas fa-tachometer-alt text-white w-4"></i>
+        <span>Dashboard</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] text-[#A1A1AA] px-3 py-2 rounded w-full nav-btn"
+        data-section="invoices"
+      >
+        <i class="fas fa-file-invoice-dollar w-4"></i>
+        <span>Invoices</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] text-[#A1A1AA] px-3 py-2 rounded w-full nav-btn"
+        data-section="planned-outages"
+      >
+        <i class="fas fa-exclamation-triangle w-4"></i>
+        <span>Planned Outages</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] text-[#A1A1AA] px-3 py-2 rounded w-full nav-btn"
+        data-section="tariff-tracker"
+      >
+        <i class="fas fa-chart-line w-4"></i>
+        <span>Tariff Tracker</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] text-[#A1A1AA] px-3 py-2 rounded w-full nav-btn"
+        data-section="cost-reducing"
+      >
+        <i class="fas fa-bolt w-4"></i>
+        <span>Cost Redusing</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] text-[#A1A1AA] px-3 py-2 rounded w-full nav-btn"
+        data-section="service"
+      >
+        <i class="fas fa-cogs w-4"></i>
+        <span>Service</span>
+      </button>
+    </nav>
+    <div class="mt-auto space-y-4">
+      <div class="flex items-center space-x-3 text-xs text-[#A1A1AA]">
+        <img
+          alt="User avatar placeholder with gray background"
+          class="w-6 h-6 rounded-full"
+          height="24"
+          src="https://storage.googleapis.com/a1aa/image/002c58f0-5a16-4441-f0f0-2e81181c31a6.jpg"
+          width="24"
+        />
+        <span>Notifications</span>
+      </div>
+      <div class="flex items-center space-x-3 text-xs text-[#A1A1AA]">
+        <img
+          alt="User avatar placeholder with gray background"
+          class="w-6 h-6 rounded-full"
+          height="24"
+          src="https://storage.googleapis.com/a1aa/image/002c58f0-5a16-4441-f0f0-2e81181c31a6.jpg"
+          width="24"
+        />
+        <span>Chintan Patel</span>
+        <i class="fas fa-chevron-down text-xs"></i>
+      </div>
+      <button
+        aria-label="Toggle dark mode"
+        class="flex items-center space-x-2 text-[#A1A1AA] text-sm"
+      >
+        <i class="fas fa-moon"></i>
+        <span>Dark View</span>
+      </button>
+    </div>
+  </aside>
+  <!-- Main content -->
+  <main class="flex-1 p-6 space-y-6 overflow-y-auto" id="main-content">
+    <!-- Dashboard content initially -->
+    <section id="dashboard-section">
+      <h1 class="text-white text-lg font-semibold">Dashboard</h1>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Invoices -->
+        <section
+          aria-label="Invoices"
+          class="bg-[#3A3F5C] rounded-lg p-5 flex flex-col justify-between"
+        >
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-[#A1A1AA] text-sm font-semibold">Invoices</h2>
+            <div class="flex items-center space-x-1 text-[#A1A1AA] text-xs">
+              <i class="fas fa-file-invoice-dollar"></i>
+              <span id="invoice-amount">1,290.00</span>
+            </div>
+          </div>
+          <p class="text-white text-3xl font-semibold mb-1" id="invoice-due">
+            $523.24
+          </p>
+          <p class="text-[#A1A1AA] text-xs mb-4" id="invoice-date">
+            2 August 2023 - 2 October 2023
+          </p>
+          <button
+            class="bg-[#F97316] text-white text-xs font-semibold rounded px-4 py-2 w-full mb-2"
+            type="button"
+          >
+            Pay My Bill
+          </button>
+          <button
+            class="text-[#F97316] text-xs font-semibold underline w-full text-left"
+            type="button"
+          >
+            View Bill Details
+          </button>
+        </section>
+        <!-- Consumption -->
+        <section
+          aria-label="Consumption chart"
+          class="bg-[#3A3F5C] rounded-lg p-5"
+        >
+          <h2 class="text-[#A1A1AA] text-sm font-semibold mb-3">Consumption</h2>
+          <div class="relative">
+            <svg
+              id="consumption-chart"
+              aria-hidden="true"
+              class="w-full h-28"
+              fill="none"
+              viewBox="0 0 300 112"
+              xmlns="http://www.w3.org/2000/svg"
+            ></svg>
+            <div
+              id="consumption-tooltip"
+              class="absolute top-4 bg-[#F97316] text-black text-xs font-semibold px-1 rounded"
+              style="width: 48px; text-align: center;"
+            >
+              0 kWh
+            </div>
+          </div>
+          <div
+            class="flex justify-between text-[#A1A1AA] text-xs mt-2 select-none"
+            aria-hidden="true"
+          >
+            <span>December</span>
+            <span>February</span>
+            <span>April</span>
+            <span>June</span>
+            <span>August</span>
+            <span>October</span>
+          </div>
+        </section>
+        <!-- Planned Outages -->
+        <section
+          aria-label="Planned Outages"
+          class="bg-[#3A3F5C] rounded-lg p-5 flex flex-col justify-between"
+        >
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-[#A1A1AA] text-sm font-semibold">Planned Outages</h2>
+            <i class="fas fa-bolt text-[#22D3EE] text-lg"></i>
+          </div>
+          <div class="mb-3">
+            <p class="text-white font-semibold text-xl" id="outage-time">
+              07:20 - 10:20
+            </p>
+            <p class="text-[#A1A1AA] text-xs" id="outage-date">
+              2 October 2023 (Today)
+            </p>
+          </div>
+          <button
+            class="bg-[#F97316] text-white text-xs font-semibold rounded px-4 py-2 w-full mb-4"
+            type="button"
+          >
+            Report Crashing
+          </button>
+          <div class="bg-[#2B2D42] rounded p-3 text-xs space-y-2">
+            <div class="flex justify-between text-white font-semibold">
+              <span id="co2-reduction">18.9</span>
+              <span id="trees-saved">5 trees</span>
+            </div>
+            <div class="flex justify-between text-[#A1A1AA]">
+              <span>CO2 Reduction</span>
+              <span>Tree Saved</span>
+            </div>
+          </div>
+        </section>
+      </div>
+      <!-- Consumption bars -->
+      <div
+        class="bg-[#3A3F5C] rounded-lg p-4 flex flex-col space-y-3 max-w-full select-none"
+        aria-label="Consumption bars"
+      >
+        <div class="flex justify-between text-xs font-semibold text-[#A1A1AA] mb-1">
+          <span>Consumption</span>
+          <span id="bar-consumption-percent">80%</span>
+        </div>
+        <div
+          id="bar-consumption"
+          class="h-2 rounded bg-gradient-to-r from-[#6B21A8] to-[#4338CA]"
+          style="width: 80%"
+        ></div>
+        <div class="flex justify-between text-xs font-semibold text-[#A1A1AA] mb-1">
+          <span>Cost / SF</span>
+          <span id="bar-cost-percent">25%</span>
+        </div>
+        <div
+          id="bar-cost"
+          class="h-2 rounded bg-gradient-to-r from-[#14B8A6] to-[#2DD4BF]"
+          style="width: 25%"
+        ></div>
+        <div class="flex justify-between text-xs font-semibold text-[#A1A1AA] mb-1">
+          <span>Carbon</span>
+          <span id="bar-carbon-percent">43%</span>
+        </div>
+        <div
+          id="bar-carbon"
+          class="h-2 rounded bg-gradient-to-r from-[#FBBF24] to-[#B45309]"
+          style="width: 43%"
+        ></div>
+        <div class="flex justify-between text-xs font-semibold text-[#A1A1AA] mb-1">
+          <span>Heating</span>
+          <span id="bar-heating-percent">67%</span>
+        </div>
+        <div
+          id="bar-heating"
+          class="h-2 rounded bg-gradient-to-r from-[#F87171] to-[#B91C1C]"
+          style="width: 67%"
+        ></div>
+      </div>
+      <!-- Annual Expense chart and My Meters -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Annual Expense -->
+        <section
+          aria-label="Annual Expense chart"
+          class="bg-[#3A3F5C] rounded-lg p-5 col-span-2"
+        >
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-[#A1A1AA] text-sm font-semibold">Annual Expense</h2>
+            <select
+              aria-label="Select year"
+              class="bg-[#2B2D42] text-white text-xs rounded px-2 py-1 focus:outline-none"
+              id="year-select"
+            >
+              <option>2025</option>
+              <option>2024</option>
+              <option>2023</option>
+            </select>
+          </div>
+          <div class="flex space-x-3 text-xs text-[#A1A1AA] mb-3 select-none">
+            <button class="px-2 py-1 rounded hover:bg-[#2B2D42]">Day</button>
+            <button class="px-2 py-1 rounded hover:bg-[#2B2D42]">Week</button>
+            <button class="px-2 py-1 rounded hover:bg-[#2B2D42]">Month</button>
+            <button class="px-2 py-1 rounded bg-[#4338CA]">Year</button>
+          </div>
+          <div class="relative">
+            <svg
+              id="annual-expense-chart"
+              aria-hidden="true"
+              class="w-full h-48"
+              fill="none"
+              viewBox="0 0 700 200"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="grad1" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#4338CA" stop-opacity="0.8" />
+                  <stop offset="100%" stop-color="#6B21A8" stop-opacity="0.8" />
+                </linearGradient>
+                <linearGradient id="grad2" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#F87171" stop-opacity="0.8" />
+                  <stop offset="100%" stop-color="#B91C1C" stop-opacity="0.8" />
+                </linearGradient>
+              </defs>
+              <path
+                id="annual-expense-path1"
+                fill="url(#grad1)"
+                stroke="#4338CA"
+                stroke-width="2"
+              ></path>
+              <path
+                id="annual-expense-path2"
+                fill="url(#grad2)"
+                stroke="#B91C1C"
+                stroke-width="2"
+              ></path>
+            </svg>
+            <div
+              id="annual-tooltip"
+              class="absolute top-20 bg-[#F97316] text-black text-xs font-semibold px-2 rounded"
+              style="width: 72px; text-align: center;"
+            >
+              Changing 0 kBtu<br />Event Status
+            </div>
+          </div>
+          <div
+            class="flex justify-between text-[#A1A1AA] text-xs mt-2 select-none"
+            aria-hidden="true"
+          >
+            <span>Jan</span>
+            <span>Feb</span>
+            <span>Mar</span>
+            <span>Apr</span>
+            <span>May</span>
+            <span>Jun</span>
+            <span>Jul</span>
+            <span>Aug</span>
+            <span>Sep</span>
+            <span>Oct</span>
+            <span>Nov</span>
+            <span>Dec</span>
+          </div>
+        </section>
+        <!-- My Meters -->
+        <section
+          aria-label="My Meters"
+          class="bg-[#3A3F5C] rounded-lg p-5 flex flex-col space-y-4"
+        >
+          <h2 class="text-[#A1A1AA] text-sm font-semibold mb-2">My Meters</h2>
+          <div class="grid grid-cols-2 gap-4" id="meters-container">
+            <button
+              class="bg-[#2B2D42] rounded-lg flex flex-col items-center justify-center p-4 text-[#6B7280] text-xs font-semibold"
+              type="button"
+              id="add-meter-btn"
+            >
+              <i class="fas fa-plus text-2xl mb-2"></i> Add Meter
+            </button>
+            <!-- Meters will be dynamically inserted here -->
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Other sections placeholders -->
+    <section id="invoices-section" class="hidden text-white">
+      <h1 class="text-lg font-semibold mb-4">Invoices</h1>
+      <p>This is the Invoices section content.</p>
+    </section>
+    <section id="planned-outages-section" class="hidden text-white">
+      <h1 class="text-lg font-semibold mb-4">Planned Outages</h1>
+      <p>This is the Planned Outages section content.</p>
+    </section>
+    <section id="tariff-tracker-section" class="hidden text-white">
+      <h1 class="text-lg font-semibold mb-4">Tariff Tracker</h1>
+      <p>This is the Tariff Tracker section content.</p>
+    </section>
+    <section id="cost-reducing-section" class="hidden text-white">
+      <h1 class="text-lg font-semibold mb-4">Cost Redusing</h1>
+      <p>This is the Cost Redusing section content.</p>
+    </section>
+    <section id="service-section" class="hidden text-white">
+      <h1 class="text-lg font-semibold mb-4">Service</h1>
+      <p>This is the Service section content.</p>
+    </section>
+
+    <!-- Add Meter Modal -->
+    <div
+      id="add-meter-modal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-meter-title"
+    >
+      <div class="bg-[#3A3F5C] rounded-lg p-6 w-80 max-w-full">
+        <h2 id="add-meter-title" class="text-white text-lg font-semibold mb-4">
+          Add New Meter
+        </h2>
+        <form id="add-meter-form" class="flex flex-col space-y-4">
+          <label for="meter-name" class="text-[#A1A1AA] text-sm font-semibold"
+            >Meter Name</label
+          >
+          <input
+            type="text"
+            id="meter-name"
+            name="meter-name"
+            required
+            class="rounded px-3 py-2 bg-[#2B2D42] text-white focus:outline-none"
+            placeholder="Enter meter name"
+          />
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              id="cancel-add-meter"
+              class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 rounded bg-[#F97316] hover:bg-[#ea7a1a] text-white font-semibold"
+            >
+              Add
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Utility to generate random integer between min and max inclusive
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Format time as HH:MM
+    function formatTime(hour, minute) {
+      const h = hour.toString().padStart(2, "0");
+      const m = minute.toString().padStart(2, "0");
+      return `${h}:${m}`;
+    }
+
+    // Update invoice data randomly
+    function updateInvoice() {
+      const amount = (Math.random() * 1000 + 100).toFixed(2);
+      document.getElementById("invoice-amount").textContent = amount;
+      document.getElementById("invoice-due").textContent = `$${amount}`;
+      // Random date range within last 3 months
+      const start = new Date();
+      start.setMonth(start.getMonth() - randomInt(1, 3));
+      const end = new Date();
+      const options = { day: "numeric", month: "long", year: "numeric" };
+      document.getElementById(
+        "invoice-date"
+      ).textContent = `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString(
+        "en-US",
+        options
+      )}`;
+    }
+
+    // Consumption chart bars data and rendering
+    const consumptionSvg = document.getElementById("consumption-chart");
+    const consumptionTooltip = document.getElementById("consumption-tooltip");
+    const barWidth = 15;
+    const barGap = 10;
+    const maxBarHeight = 90;
+    const chartHeight = 112;
+
+    function renderConsumptionChart() {
+      consumptionSvg.innerHTML = "";
+      const barsCount = 12; // 12 bars for months approx
+      const bars = [];
+      for (let i = 0; i < barsCount; i++) {
+        // Random height between 10 and maxBarHeight
+        bars[i] = randomInt(10, maxBarHeight);
+      }
+      // Find max height bar index for tooltip
+      let maxIndex = 0;
+      let maxHeight = 0;
+      bars.forEach((h, i) => {
+        if (h > maxHeight) {
+          maxHeight = h;
+          maxIndex = i;
+        }
+      });
+
+      // Draw bars
+      bars.forEach((height, i) => {
+        const x = i * (barWidth + barGap) + 10;
+        const y = chartHeight - height - 10;
+        const color = i === maxIndex ? "#F97316" : "#6B7280";
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", barWidth);
+        rect.setAttribute("height", height);
+        rect.setAttribute("fill", color);
+        consumptionSvg.appendChild(rect);
+      });
+
+      // Tooltip position and text
+      const tooltipX = maxIndex * (barWidth + barGap) + 10;
+      consumptionTooltip.style.left = tooltipX + "px";
+      consumptionTooltip.textContent = `${maxHeight} kWh`;
+    }
+
+    // Planned Outages random time and date
+    function updateOutages() {
+      // Random start hour between 0 and 20
+      const startHour = randomInt(0, 20);
+      const startMinute = randomInt(0, 59);
+      // Duration between 1 and 3 hours
+      const duration = randomInt(1, 3);
+      let endHour = startHour + duration;
+      let endMinute = startMinute;
+      if (endHour > 23) endHour = 23;
+      const startTime = formatTime(startHour, startMinute);
+      const endTime = formatTime(endHour, endMinute);
+      document.getElementById("outage-time").textContent = `${startTime} - ${endTime}`;
+
+      // Random date: today or next 5 days
+      const today = new Date();
+      const outageDate = new Date(today);
+      outageDate.setDate(today.getDate() + randomInt(0, 5));
+      const options = { day: "numeric", month: "long", year: "numeric" };
+      const isToday = outageDate.toDateString() === today.toDateString();
+      document.getElementById("outage-date").textContent = `${outageDate.toLocaleDateString(
+        "en-US",
+        options
+      )} ${isToday ? "(Today)" : ""}`;
+    }
+
+    // Update CO2 reduction and trees saved randomly
+    function updateCO2() {
+      const co2 = (Math.random() * 30).toFixed(1);
+      const trees = randomInt(1, 10);
+      document.getElementById("co2-reduction").textContent = co2;
+      document.getElementById("trees-saved").textContent = `${trees} trees`;
+    }
+
+    // Update consumption bars percentages and widths
+    function updateConsumptionBars() {
+      const consumption = randomInt(50, 100);
+      const cost = randomInt(10, 50);
+      const carbon = randomInt(20, 60);
+      const heating = randomInt(40, 80);
+
+      document.getElementById("bar-consumption-percent").textContent = consumption + "%";
+      document.getElementById("bar-consumption").style.width = consumption + "%";
+
+      document.getElementById("bar-cost-percent").textContent = cost + "%";
+      document.getElementById("bar-cost").style.width = cost + "%";
+
+      document.getElementById("bar-carbon-percent").textContent = carbon + "%";
+      document.getElementById("bar-carbon").style.width = carbon + "%";
+
+      document.getElementById("bar-heating-percent").textContent = heating + "%";
+      document.getElementById("bar-heating").style.width = heating + "%";
+    }
+
+    // Annual Expense chart paths generation
+    const annualPath1 = document.getElementById("annual-expense-path1");
+    const annualPath2 = document.getElementById("annual-expense-path2");
+    const annualTooltip = document.getElementById("annual-tooltip");
+
+    // Generate smooth path from points
+    function generateSmoothPath(points, closePath = true) {
+      if (points.length < 2) return "";
+      let d = `M${points[0].x} ${points[0].y} `;
+      for (let i = 1; i < points.length; i++) {
+        const cpX = (points[i - 1].x + points[i].x) / 2;
+        d += `Q${cpX} ${points[i - 1].y} ${points[i].x} ${points[i].y} `;
+      }
+      if (closePath) {
+        d += `L${points[points.length - 1].x} 200 L${points[0].x} 200 Z`;
+      }
+      return d;
+    }
+
+    // Generate random points for annual expense chart
+    function generateAnnualPoints() {
+      const points1 = [];
+      const points2 = [];
+      const width = 700;
+      const height = 200;
+      const months = 12;
+      const step = width / (months - 1);
+
+      for (let i = 0; i < months; i++) {
+        // Y values between 10 and 70 for first path
+        const y1 = randomInt(10, 70);
+        // Y values between 80 and 130 for second path
+        const y2 = randomInt(80, 130);
+        points1.push({ x: i * step, y: y1 });
+        points2.push({ x: i * step, y: y2 });
+      }
+      return { points1, points2 };
+    }
+
+    // Update annual expense chart and tooltip
+    function updateAnnualExpense() {
+      const { points1, points2 } = generateAnnualPoints();
+      annualPath1.setAttribute("d", generateSmoothPath(points1));
+      annualPath2.setAttribute("d", generateSmoothPath(points2));
+
+      // Find max y in points1 for tooltip
+      let maxIndex = 0;
+      let maxY = 1000;
+      points1.forEach((p, i) => {
+        if (p.y < maxY) {
+          maxY = p.y;
+          maxIndex = i;
+        }
+      });
+
+      // Position tooltip near max point
+      const tooltipX = points1[maxIndex].x;
+      const tooltipY = maxY + 20;
+      annualTooltip.style.left = tooltipX + "px";
+      annualTooltip.style.top = tooltipY + "px";
+
+      // Random kBtu value for tooltip
+      const kbtu = (Math.random() * 100).toFixed(1);
+      annualTooltip.innerHTML = `Changing ${kbtu} kBtu<br>Event Status`;
+    }
+
+    // Main update function to refresh all dynamic data
+    function updateDashboard() {
+      updateInvoice();
+      renderConsumptionChart();
+      updateOutages();
+      updateCO2();
+      updateConsumptionBars();
+      updateAnnualExpense();
+    }
+
+    // Initial update
+    updateDashboard();
+
+    // Update every 2 seconds for faster moments
+    setInterval(updateDashboard, 2000);
+
+    // My Meters data and rendering
+    const metersContainer = document.getElementById("meters-container");
+
+    // Initial meters data with new names
+    let meters = [
+      { name: "Computer Lab", active: true },
+      { name: "EC Labs", active: true },
+      { name: "Computer Lab 2", active: true },
+      { name: "EC Lab 2", active: true },
+    ];
+
+    // Create speedometer SVG element for meter
+    function createSpeedometer(value) {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", "0 0 80 80");
+      svg.setAttribute("class", "speedometer");
+
+      // Background circle
+      const bgCircle = document.createElementNS(svgNS, "circle");
+      bgCircle.setAttribute("cx", "40");
+      bgCircle.setAttribute("cy", "40");
+      bgCircle.setAttribute("r", "35");
+      bgCircle.setAttribute("stroke", "#6B7280");
+      bgCircle.setAttribute("stroke-width", "6");
+      bgCircle.setAttribute("fill", "none");
+      svg.appendChild(bgCircle);
+
+      // Foreground arc (partial circle)
+      const fgCircle = document.createElementNS(svgNS, "circle");
+      fgCircle.setAttribute("cx", "40");
+      fgCircle.setAttribute("cy", "40");
+      fgCircle.setAttribute("r", "35");
+      fgCircle.setAttribute("stroke", "#F97316");
+      fgCircle.setAttribute("stroke-width", "6");
+      fgCircle.setAttribute("fill", "none");
+      fgCircle.setAttribute("stroke-linecap", "round");
+      fgCircle.setAttribute("stroke-dasharray", 219.911); // circumference ~2πr
+      fgCircle.setAttribute("stroke-dashoffset", 219.911);
+      svg.appendChild(fgCircle);
+
+      // Needle line
+      const needle = document.createElementNS(svgNS, "line");
+      needle.setAttribute("x1", "40");
+      needle.setAttribute("y1", "40");
+      needle.setAttribute("x2", "40");
+      needle.setAttribute("y2", "10");
+      needle.setAttribute("class", "needle");
+      needle.setAttribute("stroke", "#F97316");
+      needle.setAttribute("stroke-width", "2");
+      needle.setAttribute("stroke-linecap", "round");
+      svg.appendChild(needle);
+
+      // Center circle
+      const centerCircle = document.createElementNS(svgNS, "circle");
+      centerCircle.setAttribute("cx", "40");
+      centerCircle.setAttribute("cy", "40");
+      centerCircle.setAttribute("r", "5");
+      centerCircle.setAttribute("class", "center-circle");
+      svg.appendChild(centerCircle);
+
+      // Animate needle and arc based on value (0-100)
+      function update(value) {
+        // Needle rotation from -90deg (0) to 90deg (100)
+        const rotation = (value * 180) / 100 - 90;
+        needle.style.transform = `rotate(${rotation}deg)`;
+
+        // Arc stroke dashoffset (full circle circumference 219.911)
+        const offset = 219.911 - (219.911 * value) / 100;
+        fgCircle.setAttribute("stroke-dashoffset", offset);
+      }
+
+      update(value);
+
+      return { svg, update };
+    }
+
+    // Render meters in container
+    function renderMeters() {
+      // Clear all except add meter button
+      metersContainer.querySelectorAll(".meter-item").forEach((el) => el.remove());
+
+      meters.forEach((meter, index) => {
+        const meterBtn = document.createElement("button");
+        meterBtn.type = "button";
+        meterBtn.className =
+          "meter-item rounded-lg p-4 flex flex-col items-center justify-center text-xs font-semibold cursor-pointer " +
+          (meter.active ? "bg-[#22D3EE] text-black" : "bg-[#6B7280] text-[#A1A1AA]");
+        meterBtn.style.position = "relative";
+
+        // Speedometer with random initial value
+        const speedValue = randomInt(0, 100);
+        const { svg, update } = createSpeedometer(speedValue);
+        meterBtn.appendChild(svg);
+
+        // Meter name below speedometer
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = meter.name;
+        nameSpan.className = "mt-2";
+        meterBtn.appendChild(nameSpan);
+
+        // Animate speedometer needle every 2 seconds with new random value
+        setInterval(() => {
+          const newValue = randomInt(0, 100);
+          update(newValue);
+        }, 2000);
+
+        metersContainer.appendChild(meterBtn);
+      });
+    }
+
+    renderMeters();
+
+    // Add Meter modal logic
+    const addMeterBtn = document.getElementById("add-meter-btn");
+    const addMeterModal = document.getElementById("add-meter-modal");
+    const addMeterForm = document.getElementById("add-meter-form");
+    const cancelAddMeterBtn = document.getElementById("cancel-add-meter");
+    const meterNameInput = document.getElementById("meter-name");
+
+    addMeterBtn.addEventListener("click", () => {
+      meterNameInput.value = "";
+      addMeterModal.classList.remove("hidden");
+      meterNameInput.focus();
+    });
+
+    cancelAddMeterBtn.addEventListener("click", () => {
+      addMeterModal.classList.add("hidden");
+    });
+
+    addMeterForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = meterNameInput.value.trim();
+      if (name) {
+        meters.push({ name, active: true });
+        renderMeters();
+        addMeterModal.classList.add("hidden");
+      }
+    });
+
+    // Sidebar navigation logic
+    const navButtons = document.querySelectorAll(".nav-btn");
+    const sections = {
+      dashboard: document.getElementById("dashboard-section"),
+      invoices: document.getElementById("invoices-section"),
+      "planned-outages": document.getElementById("planned-outages-section"),
+      "tariff-tracker": document.getElementById("tariff-tracker-section"),
+      "cost-reducing": document.getElementById("cost-reducing-section"),
+      service: document.getElementById("service-section"),
+    };
+
+    function showSection(sectionKey) {
+      Object.entries(sections).forEach(([key, section]) => {
+        if (key === sectionKey) {
+          section.classList.remove("hidden");
+        } else {
+          section.classList.add("hidden");
+        }
+      });
+      navButtons.forEach((btn) => {
+        if (btn.dataset.section === sectionKey) {
+          btn.classList.add("bg-[#F97316]", "text-white");
+          btn.classList.remove("text-[#A1A1AA]");
+          btn.setAttribute("aria-current", "page");
+        } else {
+          btn.classList.remove("bg-[#F97316]", "text-white");
+          btn.classList.add("text-[#A1A1AA]");
+          btn.removeAttribute("aria-current");
+        }
+      });
+    }
+
+    navButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        showSection(btn.dataset.section);
+      });
+    });
+
+    // Clicking Electrocon logo resets to dashboard
+    document.getElementById("nav-electrocon").addEventListener("click", () => {
+      showSection("dashboard");
+    });
+
+    // Initialize showing dashboard
+    showSection("dashboard");
+  </script>
+</body>
+</html>
