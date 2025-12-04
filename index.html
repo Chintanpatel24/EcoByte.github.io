@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Wattwatch Dashboard - Dynamic & Interactive</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* CSS Variables for theming */
+    :root {
+      --bg-primary: #2B2D42;
+      --bg-secondary: #1F2136;
+      --bg-card: #3A3F5C;
+      --bg-input: #2B2D42;
+      --text-primary: #ffffff;
+      --text-secondary: #A1A1AA;
+      --text-muted: #6B7280;
+      --accent: #F97316;
+      --accent-hover: #ea7a1a;
+      --border-color: #4B5563;
+    }
+
+    .light-mode {
+      --bg-primary: #F3F4F6;
+      --bg-secondary: #FFFFFF;
+      --bg-card: #FFFFFF;
+      --bg-input: #E5E7EB;
+      --text-primary: #1F2937;
+      --text-secondary: #4B5563;
+      --text-muted: #9CA3AF;
+      --accent: #F97316;
+      --accent-hover: #ea7a1a;
+      --border-color: #D1D5DB;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .bg-primary {
+      background-color: var(--bg-primary);
+    }
+
+    .bg-secondary {
+      background-color: var(--bg-secondary);
+    }
+
+    .bg-card {
+      background-color: var(--bg-card);
+    }
+
+    .bg-input {
+      background-color: var(--bg-input);
+    }
+
+    .text-primary {
+      color: var(--text-primary);
+    }
+
+    .text-secondary {
+      color: var(--text-secondary);
+    }
+
+    .text-muted {
+      color: var(--text-muted);
+    }
+
+    .border-themed {
+      border-color: var(--border-color);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--border-color);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-track {
+      background-color: var(--bg-secondary);
+    }
+
+    /* Toggle Switch Styles */
+    .toggle-switch {
+      position: relative;
+      width: 56px;
+      height: 28px;
+      background: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+      border-radius: 28px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch.active {
+      background: linear-gradient(135deg, #FCD34D 0%, #F97316 100%);
+    }
+
+    .toggle-switch::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+      border-radius: 50%;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-switch.active::before {
+      transform: translateX(28px);
+      background: linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%);
+    }
+
+    .toggle-switch .toggle-icon {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch .moon-icon {
+      left: 8px;
+      color: #60A5FA;
+      opacity: 1;
+    }
+
+    .toggle-switch .sun-icon {
+      right: 8px;
+      color: #FCD34D;
+      opacity: 0.5;
+    }
+
+    .toggle-switch.active .moon-icon {
+      opacity: 0.5;
+    }
+
+    .toggle-switch.active .sun-icon {
+      opacity: 1;
+    }
+
+    /* Speedometer style */
+    .speedometer {
+      width: 80px;
+      height: 80px;
+      position: relative;
+    }
+    .speedometer svg {
+      transform: rotate(-90deg);
+    }
+    .speedometer .needle {
+      transform-origin: 40px 40px;
+      transition: transform 0.5s ease-out;
+      stroke: #f97316;
+      stroke-width: 2;
+    }
+    .speedometer .center-circle {
+      fill: #f97316;
+    }
+
+    /* Smooth transitions */
+    .nav-btn {
+      transition: all 0.2s ease;
+    }
+    .consumption-bar {
+      transition: width 0.5s ease-out;
+    }
+
+    /* Card transitions for theme change */
+    .theme-transition {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Mobile menu */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        height: 100vh;
+        z-index: 100;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 99;
+      }
+      .overlay.show {
+        display: block;
+      }
+    }
+
+    /* Card hover effects */
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+
+    .light-mode .card-hover:hover {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    /* Pulse animation for active status */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .pulse-animate {
+      animation: pulse 2s infinite;
+    }
+
+    /* Light mode specific shadows */
+    .light-mode .shadow-card {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Theme label animation */
+    .theme-label {
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex">
+  <!-- Mobile overlay -->
+  <div id="mobile-overlay" class="overlay"></div>
+  
+  <!-- Mobile menu button -->
+  <button id="mobile-menu-btn" class="md:hidden fixed top-4 left-4 z-50 bg-[#F97316] p-2 rounded-lg">
+    <i class="fas fa-bars text-white text-xl"></i>
+  </button>
+
+  <!-- Sidebar -->
+  <aside
+    id="sidebar"
+    aria-label="Sidebar"
+    class="sidebar flex flex-col bg-secondary w-56 p-6 space-y-8 select-none md:relative theme-transition"
+    style="background-color: var(--bg-secondary);"
+  >
+    <div class="flex items-center space-x-2 cursor-pointer" id="nav-Wattwatch">
+      <div class="w-8 h-8 bg-[#F97316] rounded-lg flex items-center justify-center">
+        <i class="fas fa-bolt text-white text-lg"></i>
+      </div>
+      <span class="font-semibold text-lg tracking-wide" style="color: var(--text-primary);">Wattwatch</span>
+    </div>
+    <nav class="flex flex-col space-y-3 text-sm font-semibold" id="sidebar-nav">
+      <button
+        aria-current="page"
+        class="flex items-center space-x-3 bg-[#F97316] rounded px-3 py-2 w-full text-white nav-btn"
+        data-section="dashboard"
+      >
+        <i class="fas fa-tachometer-alt text-white w-4"></i>
+        <span>Dashboard</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] px-3 py-2 rounded w-full nav-btn"
+        data-section="invoices"
+        style="color: var(--text-secondary);"
+      >
+        <i class="fas fa-file-invoice-dollar w-4"></i>
+        <span>Invoices</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] px-3 py-2 rounded w-full nav-btn"
+        data-section="planned-outages"
+        style="color: var(--text-secondary);"
+      >
+        <i class="fas fa-exclamation-triangle w-4"></i>
+        <span>Planned Outages</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] px-3 py-2 rounded w-full nav-btn"
+        data-section="tariff-tracker"
+        style="color: var(--text-secondary);"
+      >
+        <i class="fas fa-chart-line w-4"></i>
+        <span>Tariff Tracker</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] px-3 py-2 rounded w-full nav-btn"
+        data-section="cost-reducing"
+        style="color: var(--text-secondary);"
+      >
+        <i class="fas fa-bolt w-4"></i>
+        <span>Cost Reducing</span>
+      </button>
+      <button
+        class="flex items-center space-x-3 hover:text-[#F97316] px-3 py-2 rounded w-full nav-btn"
+        data-section="service"
+        style="color: var(--text-secondary);"
+      >
+        <i class="fas fa-cogs w-4"></i>
+        <span>Service</span>
+      </button>
+    </nav>
+    <div class="mt-auto space-y-4">
+      <div class="flex items-center space-x-3 text-xs cursor-pointer hover:opacity-80 transition-opacity" style="color: var(--text-secondary);">
+        <div class="relative">
+          <i class="fas fa-bell text-lg"></i>
+          <span class="absolute -top-1 -right-1 bg-[#F97316] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+        </div>
+        <span>Notifications</span>
+      </div>
+      <div class="flex items-center space-x-3 text-xs cursor-pointer hover:opacity-80 transition-opacity" style="color: var(--text-secondary);">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#F97316] to-[#4338CA] flex items-center justify-center text-white font-semibold">
+          CP
+        </div>
+        <span>Chintan Patel</span>
+        <i class="fas fa-chevron-down text-xs"></i>
+      </div>
+      
+      <!-- Theme Toggle Button -->
+      <div class="flex items-center justify-between pt-2 border-t" style="border-color: var(--border-color);">
+        <div class="flex items-center space-x-2">
+          <i id="theme-icon" class="fas fa-moon text-sm" style="color: var(--text-secondary);"></i>
+          <span id="theme-label" class="text-sm theme-label" style="color: var(--text-secondary);">Dark Mode</span>
+        </div>
+        <div id="theme-toggle" class="toggle-switch" aria-label="Toggle dark/light mode" role="switch" aria-checked="false">
+          <i class="fas fa-moon toggle-icon moon-icon"></i>
+          <i class="fas fa-sun toggle-icon sun-icon"></i>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-4 md:p-6 space-y-6 overflow-y-auto ml-0 md:ml-0 theme-transition" id="main-content" style="background-color: var(--bg-primary);">
+    <!-- Dashboard Section -->
+    <section id="dashboard-section">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl md:text-2xl font-bold ml-12 md:ml-0" style="color: var(--text-primary);">Dashboard</h1>
+        <div class="flex items-center space-x-4">
+          <div class="hidden md:flex items-center rounded-lg px-4 py-2 theme-transition" style="background-color: var(--bg-card);">
+            <i class="fas fa-search mr-2" style="color: var(--text-secondary);"></i>
+            <input type="text" placeholder="Search..." class="bg-transparent text-sm focus:outline-none w-40" style="color: var(--text-primary);">
+          </div>
+          <div class="flex items-center space-x-2 text-[#22D3EE] text-sm">
+            <i class="fas fa-circle pulse-animate text-xs"></i>
+            <span>Live</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Invoices -->
+        <section
+          aria-label="Invoices"
+          class="rounded-lg p-5 flex flex-col justify-between card-hover theme-transition shadow-card"
+          style="background-color: var(--bg-card);"
+        >
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-sm font-semibold" style="color: var(--text-secondary);">Invoices</h2>
+            <div class="flex items-center space-x-1 text-xs" style="color: var(--text-secondary);">
+              <i class="fas fa-file-invoice-dollar"></i>
+              <span id="invoice-amount">1,290.00</span>
+            </div>
+          </div>
+          <p class="text-3xl font-bold mb-1" id="invoice-due" style="color: var(--text-primary);">
+            $523.24
+          </p>
+          <p class="text-xs mb-4" id="invoice-date" style="color: var(--text-secondary);">
+            2 August 2023 - 2 October 2023
+          </p>
+          <button
+            class="bg-[#F97316] hover:bg-[#ea7a1a] text-white text-xs font-semibold rounded px-4 py-2 w-full mb-2 transition-colors"
+            type="button"
+            id="pay-bill-btn"
+          >
+            Pay My Bill
+          </button>
+          <button
+            class="text-[#F97316] hover:text-[#ea7a1a] text-xs font-semibold underline w-full text-left transition-colors"
+            type="button"
+          >
+            View Bill Details
+          </button>
+        </section>
+
+        <!-- Consumption -->
+        <section
+          aria-label="Consumption chart"
+          class="rounded-lg p-5 card-hover theme-transition shadow-card"
+          style="background-color: var(--bg-card);"
+        >
+          <h2 class="text-sm font-semibold mb-3" style="color: var(--text-secondary);">Consumption</h2>
+          <div class="relative">
+            <svg
+              id="consumption-chart"
+              aria-hidden="true"
+              class="w-full h-28"
+              fill="none"
+              viewBox="0 0 300 112"
+              xmlns="http://www.w3.org/2000/svg"
+            ></svg>
+            <div
+              id="consumption-tooltip"
+              class="absolute top-4 bg-[#F97316] text-black text-xs font-semibold px-2 py-1 rounded"
+              style="text-align: center;"
+            >
+              0 kWh
+            </div>
+          </div>
+          <div
+            class="flex justify-between text-xs mt-2 select-none"
+            aria-hidden="true"
+            style="color: var(--text-secondary);"
+          >
+            <span>Dec</span>
+            <span>Feb</span>
+            <span>Apr</span>
+            <span>Jun</span>
+            <span>Aug</span>
+            <span>Oct</span>
+          </div>
+        </section>
+
+        <!-- Planned Outages -->
+        <section
+          aria-label="Planned Outages"
+          class="rounded-lg p-5 flex flex-col justify-between card-hover theme-transition shadow-card"
+          style="background-color: var(--bg-card);"
+        >
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-sm font-semibold" style="color: var(--text-secondary);">Planned Outages</h2>
+            <i class="fas fa-bolt text-[#22D3EE] text-lg"></i>
+          </div>
+          <div class="mb-3">
+            <p class="font-bold text-xl" id="outage-time" style="color: var(--text-primary);">
+              07:20 - 10:20
+            </p>
+            <p class="text-xs" id="outage-date" style="color: var(--text-secondary);">
+              2 October 2023 (Today)
+            </p>
+          </div>
+          <button
+            class="bg-[#F97316] hover:bg-[#ea7a1a] text-white text-xs font-semibold rounded px-4 py-2 w-full mb-4 transition-colors"
+            type="button"
+          >
+            Report Issue
+          </button>
+          <div class="rounded p-3 text-xs space-y-2 theme-transition" style="background-color: var(--bg-primary);">
+            <div class="flex justify-between font-semibold" style="color: var(--text-primary);">
+              <span id="co2-reduction">18.9</span>
+              <span id="trees-saved">5 trees</span>
+            </div>
+            <div class="flex justify-between" style="color: var(--text-secondary);">
+              <span>CO2 Reduction (kg)</span>
+              <span>Trees Saved</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Consumption bars -->
+      <div
+        class="rounded-lg p-4 flex flex-col space-y-3 max-w-full select-none card-hover mt-6 theme-transition shadow-card"
+        aria-label="Consumption bars"
+        style="background-color: var(--bg-card);"
+      >
+        <h2 class="text-sm font-semibold mb-2" style="color: var(--text-secondary);">Energy Metrics</h2>
+        <div class="flex justify-between text-xs font-semibold mb-1" style="color: var(--text-secondary);">
+          <span>Consumption</span>
+          <span id="bar-consumption-percent">80%</span>
+        </div>
+        <div class="h-2 rounded w-full" style="background-color: var(--bg-primary);">
+          <div
+            id="bar-consumption"
+            class="h-2 rounded bg-gradient-to-r from-[#6B21A8] to-[#4338CA] consumption-bar"
+            style="width: 80%"
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs font-semibold mb-1" style="color: var(--text-secondary);">
+          <span>Cost / SF</span>
+          <span id="bar-cost-percent">25%</span>
+        </div>
+        <div class="h-2 rounded w-full" style="background-color: var(--bg-primary);">
+          <div
+            id="bar-cost"
+            class="h-2 rounded bg-gradient-to-r from-[#14B8A6] to-[#2DD4BF] consumption-bar"
+            style="width: 25%"
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs font-semibold mb-1" style="color: var(--text-secondary);">
+          <span>Carbon</span>
+          <span id="bar-carbon-percent">43%</span>
+        </div>
+        <div class="h-2 rounded w-full" style="background-color: var(--bg-primary);">
+          <div
+            id="bar-carbon"
+            class="h-2 rounded bg-gradient-to-r from-[#FBBF24] to-[#B45309] consumption-bar"
+            style="width: 43%"
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs font-semibold mb-1" style="color: var(--text-secondary);">
+          <span>Heating</span>
+          <span id="bar-heating-percent">67%</span>
+        </div>
+        <div class="h-2 rounded w-full" style="background-color: var(--bg-primary);">
+          <div
+            id="bar-heating"
+            class="h-2 rounded bg-gradient-to-r from-[#F87171] to-[#B91C1C] consumption-bar"
+            style="width: 67%"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Annual Expense chart and My Meters -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <!-- Annual Expense -->
+        <section
+          aria-label="Annual Expense chart"
+          class="rounded-lg p-5 col-span-1 md:col-span-2 card-hover theme-transition shadow-card"
+          style="background-color: var(--bg-card);"
+        >
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-sm font-semibold" style="color: var(--text-secondary);">Annual Expense</h2>
+            <select
+              aria-label="Select year"
+              class="text-xs rounded px-2 py-1 focus:outline-none cursor-pointer theme-transition"
+              id="year-select"
+              style="background-color: var(--bg-primary); color: var(--text-primary);"
+            >
+              <option>2025</option>
+              <option>2024</option>
+              <option>2023</option>
+            </select>
+          </div>
+          <div class="flex space-x-2 text-xs mb-3 select-none" id="time-filter-btns" style="color: var(--text-secondary);">
+            <button class="px-3 py-1 rounded hover:bg-opacity-50 transition-colors time-filter-btn" style="background-color: transparent;">Day</button>
+            <button class="px-3 py-1 rounded hover:bg-opacity-50 transition-colors time-filter-btn" style="background-color: transparent;">Week</button>
+            <button class="px-3 py-1 rounded hover:bg-opacity-50 transition-colors time-filter-btn" style="background-color: transparent;">Month</button>
+            <button class="px-3 py-1 rounded bg-[#4338CA] text-white transition-colors time-filter-btn active">Year</button>
+          </div>
+          <div class="relative">
+            <svg
+              id="annual-expense-chart"
+              aria-hidden="true"
+              class="w-full h-48"
+              fill="none"
+              viewBox="0 0 700 200"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="grad1" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#4338CA" stop-opacity="0.8" />
+                  <stop offset="100%" stop-color="#6B21A8" stop-opacity="0.2" />
+                </linearGradient>
+                <linearGradient id="grad2" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#F87171" stop-opacity="0.8" />
+                  <stop offset="100%" stop-color="#B91C1C" stop-opacity="0.2" />
+                </linearGradient>
+              </defs>
+              <path
+                id="annual-expense-path1"
+                fill="url(#grad1)"
+                stroke="#4338CA"
+                stroke-width="2"
+              ></path>
+              <path
+                id="annual-expense-path2"
+                fill="url(#grad2)"
+                stroke="#B91C1C"
+                stroke-width="2"
+              ></path>
+            </svg>
+            <div
+              id="annual-tooltip"
+              class="absolute bg-[#F97316] text-black text-xs font-semibold px-2 py-1 rounded shadow-lg"
+              style="text-align: center;"
+            >
+              0 kBtu<br>Active
+            </div>
+          </div>
+          <div
+            class="flex justify-between text-xs mt-2 select-none"
+            aria-hidden="true"
+            style="color: var(--text-secondary);"
+          >
+            <span>Jan</span>
+            <span>Feb</span>
+            <span>Mar</span>
+            <span>Apr</span>
+            <span>May</span>
+            <span>Jun</span>
+            <span>Jul</span>
+            <span>Aug</span>
+            <span>Sep</span>
+            <span>Oct</span>
+            <span>Nov</span>
+            <span>Dec</span>
+          </div>
+          <div class="flex items-center justify-center space-x-6 mt-4 text-xs">
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded bg-[#4338CA]"></div>
+              <span style="color: var(--text-secondary);">Electricity</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded bg-[#B91C1C]"></div>
+              <span style="color: var(--text-secondary);">Heating</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- My Meters -->
+        <section
+          aria-label="My Meters"
+          class="rounded-lg p-5 flex flex-col card-hover theme-transition shadow-card"
+          style="background-color: var(--bg-card);"
+        >
+          <h2 class="text-sm font-semibold mb-4" style="color: var(--text-secondary);">My Meters</h2>
+          <div class="grid grid-cols-2 gap-4" id="meters-container">
+            <button
+              class="rounded-lg flex flex-col items-center justify-center p-4 text-xs font-semibold transition-colors hover:opacity-80"
+              type="button"
+              id="add-meter-btn"
+              style="background-color: var(--bg-primary); color: var(--text-muted);"
+            >
+              <i class="fas fa-plus text-2xl mb-2"></i> Add Meter
+            </button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Invoices Section -->
+    <section id="invoices-section" class="hidden">
+      <h1 class="text-xl md:text-2xl font-bold mb-6 ml-12 md:ml-0" style="color: var(--text-primary);">Invoices</h1>
+      <div class="rounded-lg p-6 theme-transition shadow-card" style="background-color: var(--bg-card);">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
+          <div class="flex items-center space-x-4">
+            <select class="text-sm rounded px-3 py-2 theme-transition" style="background-color: var(--bg-primary); color: var(--text-primary);">
+              <option>All Invoices</option>
+              <option>Paid</option>
+              <option>Pending</option>
+              <option>Overdue</option>
+            </select>
+          </div>
+          <button class="bg-[#F97316] hover:bg-[#ea7a1a] text-white px-4 py-2 rounded text-sm font-semibold transition-colors">
+            <i class="fas fa-download mr-2"></i>Export All
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="invoices-table">
+            <thead>
+              <tr class="border-b" style="color: var(--text-secondary); border-color: var(--border-color);">
+                <th class="text-left py-3 px-2">Invoice #</th>
+                <th class="text-left py-3 px-2">Date</th>
+                <th class="text-left py-3 px-2">Amount</th>
+                <th class="text-left py-3 px-2">Status</th>
+                <th class="text-left py-3 px-2">Action</th>
+              </tr>
+            </thead>
+            <tbody id="invoices-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Planned Outages Section -->
+    <section id="planned-outages-section" class="hidden">
+      <h1 class="text-xl md:text-2xl font-bold mb-6 ml-12 md:ml-0" style="color: var(--text-primary);">Planned Outages</h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="rounded-lg p-6 theme-transition shadow-card" style="background-color: var(--bg-card);">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Upcoming Outages</h2>
+          <div id="outages-list" class="space-y-4">
+          </div>
+        </div>
+        <div class="rounded-lg p-6 theme-transition shadow-card" style="background-color: var(--bg-card);">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Outage Map</h2>
+          <div class="rounded-lg h-64 flex items-center justify-center theme-transition" style="background-color: var(--bg-primary);">
+            <div class="text-center">
+              <i class="fas fa-map-marked-alt text-4xl text-[#F97316] mb-2"></i>
+              <p class="text-sm" style="color: var(--text-secondary);">Interactive map view</p>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-sm">
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded-full bg-[#22D3EE]"></div>
+              <span style="color: var(--text-secondary);">Scheduled</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded-full bg-[#F97316]"></div>
+              <span style="color: var(--text-secondary);">In Progress</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded-full bg-[#22C55E]"></div>
+              <span style="color: var(--text-secondary);">Completed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tariff Tracker Section -->
+    <section id="tariff-tracker-section" class="hidden">
+      <h1 class="text-xl md:text-2xl font-bold mb-6 ml-12 md:ml-0" style="color: var(--text-primary);">Tariff Tracker</h1>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="rounded-lg p-6 card-hover theme-transition shadow-card" style="background-color: var(--bg-card);">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm" style="color: var(--text-secondary);">Current Rate</span>
+            <i class="fas fa-bolt text-[#22D3EE]"></i>
+          </div>
+          <p class="text-3xl font-bold" id="current-rate" style="color: var(--text-primary);">$0.12</p>
+          <p class="text-xs" style="color: var(--text-secondary);">per kWh</p>
+        </div>
+        <div class="rounded-lg p-6 card-hover theme-transition shadow-card" style="background-color: var(--bg-card);">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm" style="color: var(--text-secondary);">Peak Rate</span>
+            <i class="fas fa-arrow-up text-[#F87171]"></i>
+          </div>
+          <p class="text-3xl font-bold" id="peak-rate" style="color: var(--text-primary);">$0.18</p>
+          <p class="text-xs" style="color: var(--text-secondary);">per kWh (6PM - 9PM)</p>
+        </div>
+        <div class="rounded-lg p-6 card-hover theme-transition shadow-card" style="background-color: var(--bg-card);">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm" style="color: var(--text-secondary);">Off-Peak Rate</span>
+            <i class="fas fa-arrow-down text-[#22C55E]"></i>
+          </div>
+          <p class="text-3xl font-bold" id="offpeak-rate" style="color: var(--text-primary);">$0.08</p>
+          <p class="text-xs" style="color: var(--text-secondary);">per kWh (11PM - 6AM)</p>
+        </div>
+      </div>
+      <div class="rounded-lg p-6 theme-transition shadow-card" style="background-color: var(--bg-card);">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Rate History</h2>
+        <svg id="tariff-chart" class="w-full h-48" viewBox="0 0 700 200"></svg>
+        <div class="flex justify-between text-xs mt-2" style="color: var(--text-secondary);">
+          <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+          <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cost Reducing Section -->
+    <section id="cost-reducing-section" class="hidden">
+      <h1 class="text-xl md:text-2xl font-bold mb-6 ml-12 md:ml-0" style="color: var(--text-primary);">Cost Reducing Tips</h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="tips-container">
+      </div>
+      <div class="rounded-lg p-6 mt-6 theme-transition shadow-card" style="background-color: var(--bg-card);">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Potential Savings</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="rounded-lg p-4 text-center theme-transition" style="background-color: var(--bg-primary);">
+            <p class="text-3xl font-bold text-[#22C55E]" id="monthly-savings">$47</p>
+            <p class="text-xs" style="color: var(--text-secondary);">Monthly Savings</p>
+          </div>
+          <div class="rounded-lg p-4 text-center theme-transition" style="background-color: var(--bg-primary);">
+            <p class="text-3xl font-bold text-[#22D3EE]" id="yearly-savings">$564</p>
+            <p class="text-xs" style="color: var(--text-secondary);">Yearly Savings</p>
+          </div>
+          <div class="rounded-lg p-4 text-center theme-transition" style="background-color: var(--bg-primary);">
+            <p class="text-3xl font-bold text-[#F97316]" id="co2-savings">234 kg</p>
+            <p class="text-xs" style="color: var(--text-secondary);">CO2 Reduced</p>
+          </div>
+          <div class="rounded-lg p-4 text-center theme-transition" style="background-color: var(--bg-primary);">
+            <p class="text-3xl font-bold text-[#A855F7]" id="efficiency-score">87%</p>
+            <p class="text-xs" style="color: var(--text-secondary);">Efficiency Score</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Service Section -->
+    <section id="service-section" class="hidden">
+      <h1 class="text-xl md:text-2xl font-bold mb-6 ml-12 md:ml-0" style="color: var(--text-primary);">Service & Support</h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="rounded-lg p-6 theme-transition shadow-card" style="background-color: var(--bg-card);">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Contact Support</h2>
+          <form id="support-form" class="space-y-4">
+            <div>
+              <label class="block text-sm mb-2" style="color: var(--text-secondary);">Subject</label>
+              <input type="text" class="w-full rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#F97316] theme-transition" placeholder="Enter subject" style="background-color: var(--bg-primary); color: var(--text-primary);">
+            </div>
+            <div>
+              <label class="block text-sm mb-2" style="color: var(--text-secondary);">Category</label>
+              <select class="w-full rounded px-4 py-2 focus:outline-none theme-transition" style="background-color: var(--bg-primary); color: var(--text-primary);">
+                <option>Billing Issue</option>
+                <option>Technical Support</option>
+                <option>Meter Reading</option>
+                <option>General Inquiry</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm mb-2" style="color: var(--text-secondary);">Message</label>
+              <textarea class="w-full rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#F97316] h-32 theme-transition" placeholder="Describe your issue..." style="background-color: var(--bg-primary); color: var(--text-primary);"></textarea>
+            </div>
+            <button type="submit" class="bg-[#F97316] hover:bg-[#ea7a1a] text-white px-6 py-2 rounded font-semibold transition-colors">
+              Submit Request
+            </button>
+          </form>
+        </div>
+        <div class="rounded-lg p-6 theme-transition shadow-card" style="background-color: var(--bg-card);">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Quick Links</h2>
+          <div class="space-y-3">
+            <a href="#" class="flex items-center justify-between p-3 rounded hover:opacity-80 transition-all theme-transition" style="background-color: var(--bg-primary);">
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-book text-[#F97316]"></i>
+                <span style="color: var(--text-primary);">User Guide</span>
+              </div>
+              <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+            </a>
+            <a href="#" class="flex items-center justify-between p-3 rounded hover:opacity-80 transition-all theme-transition" style="background-color: var(--bg-primary);">
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-question-circle text-[#22D3EE]"></i>
+                <span style="color: var(--text-primary);">FAQ</span>
+              </div>
+              <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+            </a>
+            <a href="#" class="flex items-center justify-between p-3 rounded hover:opacity-80 transition-all theme-transition" style="background-color: var(--bg-primary);">
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-video text-[#A855F7]"></i>
+                <span style="color: var(--text-primary);">Video Tutorials</span>
+              </div>
+              <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+            </a>
+            <a href="#" class="flex items-center justify-between p-3 rounded hover:opacity-80 transition-all theme-transition" style="background-color: var(--bg-primary);">
+              <div class="flex items-center space-x-3">
+                <i class="fas fa-phone text-[#22C55E]"></i>
+                <span style="color: var(--text-primary);">Call Us: 1-800-WATTWATCH</span>
+              </div>
+              <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+            </a>
+          </div>
+          <div class="mt-6 p-4 rounded-lg theme-transition" style="background-color: var(--bg-primary);">
+            <h3 class="font-semibold mb-2" style="color: var(--text-primary);">Support Hours</h3>
+            <p class="text-sm" style="color: var(--text-secondary);">Monday - Friday: 8AM - 8PM</p>
+            <p class="text-sm" style="color: var(--text-secondary);">Saturday: 9AM - 5PM</p>
+            <p class="text-sm" style="color: var(--text-secondary);">Sunday: Closed</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Meter Modal -->
+    <div
+      id="add-meter-modal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-meter-title"
+    >
+      <div class="rounded-lg p-6 w-80 max-w-full mx-4 theme-transition" style="background-color: var(--bg-card);">
+        <h2 id="add-meter-title" class="text-lg font-semibold mb-4" style="color: var(--text-primary);">
+          Add New Meter
+        </h2>
+        <form id="add-meter-form" class="flex flex-col space-y-4">
+          <div>
+            <label for="meter-name" class="text-sm font-semibold block mb-2" style="color: var(--text-secondary);">Meter Name</label>
+            <input
+              type="text"
+              id="meter-name"
+              name="meter-name"
+              required
+              class="w-full rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F97316] theme-transition"
+              placeholder="Enter meter name"
+              style="background-color: var(--bg-primary); color: var(--text-primary);"
+            />
+          </div>
+          <div>
+            <label for="meter-type" class="text-sm font-semibold block mb-2" style="color: var(--text-secondary);">Meter Type</label>
+            <select id="meter-type" class="w-full rounded px-3 py-2 focus:outline-none theme-transition" style="background-color: var(--bg-primary); color: var(--text-primary);">
+              <option>Electricity</option>
+              <option>Gas</option>
+              <option>Water</option>
+            </select>
+          </div>
+          <div class="flex justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              id="cancel-add-meter"
+              class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 text-white transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 rounded bg-[#F97316] hover:bg-[#ea7a1a] text-white font-semibold transition-colors"
+            >
+              Add Meter
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div
+      id="payment-modal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="rounded-lg p-6 w-96 max-w-full mx-4 theme-transition" style="background-color: var(--bg-card);">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Pay Your Bill</h2>
+        <div class="rounded-lg p-4 mb-4 theme-transition" style="background-color: var(--bg-primary);">
+          <p class="text-sm" style="color: var(--text-secondary);">Amount Due</p>
+          <p class="text-2xl font-bold" id="payment-amount" style="color: var(--text-primary);">$523.24</p>
+        </div>
+        <form id="payment-form" class="space-y-4">
+          <div>
+            <label class="text-sm block mb-2" style="color: var(--text-secondary);">Card Number</label>
+            <input type="text" class="w-full rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F97316] theme-transition" placeholder="1234 5678 9012 3456" style="background-color: var(--bg-primary); color: var(--text-primary);">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm block mb-2" style="color: var(--text-secondary);">Expiry</label>
+              <input type="text" class="w-full rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F97316] theme-transition" placeholder="MM/YY" style="background-color: var(--bg-primary); color: var(--text-primary);">
+            </div>
+            <div>
+              <label class="text-sm block mb-2" style="color: var(--text-secondary);">CVV</label>
+              <input type="text" class="w-full rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F97316] theme-transition" placeholder="123" style="background-color: var(--bg-primary); color: var(--text-primary);">
+            </div>
+          </div>
+          <div class="flex justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              id="cancel-payment"
+              class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 text-white transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 rounded bg-[#22C55E] hover:bg-[#16a34a] text-white font-semibold transition-colors"
+            >
+              Pay Now
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-[#22C55E] text-white px-6 py-3 rounded-lg shadow-lg hidden transform transition-transform duration-300 z-50">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">Success!</span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Theme Management
+    let isDarkMode = true;
+
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      const body = document.body;
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeLabel = document.getElementById('theme-label');
+      const themeIcon = document.getElementById('theme-icon');
+
+      if (isDarkMode) {
+        body.classList.remove('light-mode');
+        themeToggle.classList.remove('active');
+        themeLabel.textContent = 'Dark Mode';
+        themeIcon.className = 'fas fa-moon text-sm';
+        localStorage.setItem('wattwatch-theme', 'dark');
+      } else {
+        body.classList.add('light-mode');
+        themeToggle.classList.add('active');
+        themeLabel.textContent = 'Light Mode';
+        themeIcon.className = 'fas fa-sun text-sm';
+        localStorage.setItem('wattwatch-theme', 'light');
+      }
+
+      // Update chart bar colors for visibility
+      updateChartColors();
+    }
+
+    function updateChartColors() {
+      const barColor = isDarkMode ? '#6B7280' : '#9CA3AF';
+      // Re-render charts with appropriate colors
+      renderConsumptionChart();
+    }
+
+    // Initialize theme from localStorage
+    function initTheme() {
+      const savedTheme = localStorage.getItem('wattwatch-theme');
+      if (savedTheme === 'light') {
+        isDarkMode = false;
+        document.body.classList.add('light-mode');
+        document.getElementById('theme-toggle').classList.add('active');
+        document.getElementById('theme-label').textContent = 'Light Mode';
+        document.getElementById('theme-icon').className = 'fas fa-sun text-sm';
+      }
+    }
+
+    // Theme Toggle Event
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+    // Utility Functions
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function formatTime(hour, minute) {
+      const h = hour.toString().padStart(2, "0");
+      const m = (minute || 0).toString().padStart(2, "0");
+      return `${h}:${m}`;
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      toastMessage.textContent = message;
+      toast.className = `fixed bottom-4 right-4 ${type === 'success' ? 'bg-[#22C55E]' : 'bg-[#F87171]'} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Mobile Menu
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      mobileOverlay.classList.toggle('show');
+    });
+
+    mobileOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      mobileOverlay.classList.remove('show');
+    });
+
+    // Invoice Functions
+    function updateInvoice() {
+      const amount = (Math.random() * 1000 + 100).toFixed(2);
+      document.getElementById("invoice-amount").textContent = amount;
+      document.getElementById("invoice-due").textContent = `$${amount}`;
+      document.getElementById("payment-amount").textContent = `$${amount}`;
+      
+      const start = new Date();
+      start.setMonth(start.getMonth() - randomInt(1, 3));
+      const end = new Date();
+      const options = { day: "numeric", month: "long", year: "numeric" };
+      document.getElementById("invoice-date").textContent = 
+        `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
+    }
+
+    // Consumption Chart
+    const consumptionSvg = document.getElementById("consumption-chart");
+    const consumptionTooltip = document.getElementById("consumption-tooltip");
+    const barWidth = 18;
+    const barGap = 8;
+    const maxBarHeight = 85;
+    const chartHeight = 112;
+
+    function renderConsumptionChart() {
+      consumptionSvg.innerHTML = "";
+      const barsCount = 12;
+      const bars = [];
+      
+      for (let i = 0; i < barsCount; i++) {
+        bars[i] = randomInt(15, maxBarHeight);
+      }
+      
+      let maxIndex = 0;
+      let maxHeight = 0;
+      bars.forEach((h, i) => {
+        if (h > maxHeight) {
+          maxHeight = h;
+          maxIndex = i;
+        }
+      });
+
+      const defaultBarColor = isDarkMode ? '#6B7280' : '#9CA3AF';
+
+      bars.forEach((height, i) => {
+        const x = i * (barWidth + barGap) + 10;
+        const y = chartHeight - height - 10;
+        const color = i === maxIndex ? "#F97316" : defaultBarColor;
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", barWidth);
+        rect.setAttribute("height", height);
+        rect.setAttribute("rx", "3");
+        rect.setAttribute("fill", color);
+        rect.style.transition = "height 0.5s ease-out, y 0.5s ease-out";
+        consumptionSvg.appendChild(rect);
+      });
+
+      const tooltipX = maxIndex * (barWidth + barGap) + 10;
+      consumptionTooltip.style.left = tooltipX + "px";
+      consumptionTooltip.textContent = `${maxHeight} kWh`;
+    }
+
+    // Outages Functions
+    function updateOutages() {
+      const startHour = randomInt(0, 20);
+      const startMinute = randomInt(0, 59);
+      const duration = randomInt(1, 3);
+      let endHour = startHour + duration;
+      if (endHour > 23) endHour = 23;
+      
+      document.getElementById("outage-time").textContent = 
+        `${formatTime(startHour, startMinute)} - ${formatTime(endHour, startMinute)}`;
+
+      const today = new Date();
+      const outageDate = new Date(today);
+      outageDate.setDate(today.getDate() + randomInt(0, 5));
+      const options = { day: "numeric", month: "long", year: "numeric" };
+      const isToday = outageDate.toDateString() === today.toDateString();
+      document.getElementById("outage-date").textContent = 
+        `${outageDate.toLocaleDateString("en-US", options)} ${isToday ? "(Today)" : ""}`;
+    }
+
+    function updateCO2() {
+      const co2 = (Math.random() * 30).toFixed(1);
+      const trees = randomInt(1, 10);
+      document.getElementById("co2-reduction").textContent = co2;
+      document.getElementById("trees-saved").textContent = `${trees} trees`;
+    }
+
+    // Consumption Bars
+    function updateConsumptionBars() {
+      const values = {
+        consumption: randomInt(50, 100),
+        cost: randomInt(10, 50),
+        carbon: randomInt(20, 60),
+        heating: randomInt(40, 80)
+      };
+
+      Object.keys(values).forEach(key => {
+        document.getElementById(`bar-${key}-percent`).textContent = values[key] + "%";
+        document.getElementById(`bar-${key}`).style.width = values[key] + "%";
+      });
+    }
+
+    // Annual Expense Chart
+    const annualPath1 = document.getElementById("annual-expense-path1");
+    const annualPath2 = document.getElementById("annual-expense-path2");
+    const annualTooltip = document.getElementById("annual-tooltip");
+
+    function generateSmoothPath(points, closePath = true) {
+      if (points.length < 2) return "";
+      let d = `M${points[0].x} ${points[0].y} `;
+      for (let i = 1; i < points.length; i++) {
+        const cpX = (points[i - 1].x + points[i].x) / 2;
+        d += `Q${cpX} ${points[i - 1].y} ${points[i].x} ${points[i].y} `;
+      }
+      if (closePath) {
+        d += `L${points[points.length - 1].x} 200 L${points[0].x} 200 Z`;
+      }
+      return d;
+    }
+
+    function updateAnnualExpense() {
+      const points1 = [];
+      const points2 = [];
+      const width = 700;
+      const months = 12;
+      const step = width / (months - 1);
+
+      for (let i = 0; i < months; i++) {
+        points1.push({ x: i * step, y: randomInt(20, 80) });
+        points2.push({ x: i * step, y: randomInt(90, 150) });
+      }
+
+      annualPath1.setAttribute("d", generateSmoothPath(points1));
+      annualPath2.setAttribute("d", generateSmoothPath(points2));
+
+      let maxIndex = 0;
+      let maxY = 1000;
+      points1.forEach((p, i) => {
+        if (p.y < maxY) {
+          maxY = p.y;
+          maxIndex = i;
+        }
+      });
+
+      annualTooltip.style.left = points1[maxIndex].x + "px";
+      annualTooltip.style.top = maxY + 20 + "px";
+      annualTooltip.innerHTML = `${(Math.random() * 100).toFixed(1)} kBtu<br>Active`;
+    }
+
+    // Meters
+    const metersContainer = document.getElementById("meters-container");
+    let meters = [
+      { name: "Computer Lab", active: true },
+      { name: "EC Labs", active: true },
+      { name: "Computer Lab 2", active: true },
+      { name: "EC Lab 2", active: true },
+    ];
+
+    function createSpeedometer(value) {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", "0 0 80 80");
+      svg.setAttribute("width", "60");
+      svg.setAttribute("height", "60");
+
+      const bgCircle = document.createElementNS(svgNS, "circle");
+      bgCircle.setAttribute("cx", "40");
+      bgCircle.setAttribute("cy", "40");
+      bgCircle.setAttribute("r", "30");
+      bgCircle.setAttribute("stroke", isDarkMode ? "#4B5563" : "#D1D5DB");
+      bgCircle.setAttribute("stroke-width", "6");
+      bgCircle.setAttribute("fill", "none");
+      svg.appendChild(bgCircle);
+
+      const fgCircle = document.createElementNS(svgNS, "circle");
+      fgCircle.setAttribute("cx", "40");
+      fgCircle.setAttribute("cy", "40");
+      fgCircle.setAttribute("r", "30");
+      fgCircle.setAttribute("stroke", "#F97316");
+      fgCircle.setAttribute("stroke-width", "6");
+      fgCircle.setAttribute("fill", "none");
+      fgCircle.setAttribute("stroke-linecap", "round");
+      fgCircle.setAttribute("stroke-dasharray", "188.5");
+      fgCircle.setAttribute("stroke-dashoffset", "188.5");
+      fgCircle.style.transform = "rotate(-90deg)";
+      fgCircle.style.transformOrigin = "center";
+      fgCircle.style.transition = "stroke-dashoffset 0.5s ease-out";
+      svg.appendChild(fgCircle);
+
+      const valueText = document.createElementNS(svgNS, "text");
+      valueText.setAttribute("x", "40");
+      valueText.setAttribute("y", "45");
+      valueText.setAttribute("text-anchor", "middle");
+      valueText.setAttribute("fill", isDarkMode ? "white" : "#1F2937");
+      valueText.setAttribute("font-size", "12");
+      valueText.setAttribute("font-weight", "bold");
+      valueText.textContent = value + "%";
+      svg.appendChild(valueText);
+
+      function update(newValue) {
+        const offset = 188.5 - (188.5 * newValue) / 100;
+        fgCircle.setAttribute("stroke-dashoffset", offset);
+        valueText.textContent = newValue + "%";
+        valueText.setAttribute("fill", isDarkMode ? "white" : "#1F2937");
+        bgCircle.setAttribute("stroke", isDarkMode ? "#4B5563" : "#D1D5DB");
+      }
+
+      update(value);
+      return { svg, update };
+    }
+
+    function renderMeters() {
+      metersContainer.querySelectorAll(".meter-item").forEach(el => el.remove());
+
+      meters.forEach((meter, index) => {
+        const meterDiv = document.createElement("div");
+        meterDiv.className = "meter-item rounded-lg p-3 flex flex-col items-center justify-center cursor-pointer transition-all hover:opacity-80 theme-transition";
+        meterDiv.style.backgroundColor = "var(--bg-primary)";
+
+        const speedValue = randomInt(20, 95);
+        const { svg, update } = createSpeedometer(speedValue);
+        meterDiv.appendChild(svg);
+
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = meter.name;
+        nameSpan.className = "mt-2 text-xs text-center";
+        nameSpan.style.color = "var(--text-secondary)";
+        meterDiv.appendChild(nameSpan);
+
+        const statusDot = document.createElement("div");
+        statusDot.className = `w-2 h-2 rounded-full mt-1 ${meter.active ? 'bg-[#22C55E]' : 'bg-[#F87171]'}`;
+        meterDiv.appendChild(statusDot);
+
+        setInterval(() => {
+          update(randomInt(20, 95));
+        }, 2000);
+
+        metersContainer.appendChild(meterDiv);
+      });
+    }
+
+    // Invoices Table
+    function generateInvoices() {
+      const tbody = document.getElementById('invoices-tbody');
+      tbody.innerHTML = '';
+      
+      const statuses = ['Paid', 'Pending', 'Overdue'];
+      const statusColors = {
+        'Paid': 'bg-[#22C55E]',
+        'Pending': 'bg-[#FBBF24]',
+        'Overdue': 'bg-[#F87171]'
+      };
+
+      for (let i = 0; i < 8; i++) {
+        const status = statuses[randomInt(0, 2)];
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        
+        const row = document.createElement('tr');
+        row.className = 'border-b hover:opacity-80 transition-colors';
+        row.style.borderColor = 'var(--border-color)';
+        row.style.color = 'var(--text-primary)';
+        row.innerHTML = `
+          <td class="py-3 px-2">#INV-${2024}${String(i + 1).padStart(3, '0')}</td>
+          <td class="py-3 px-2">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+          <td class="py-3 px-2">$${(Math.random() * 500 + 100).toFixed(2)}</td>
+          <td class="py-3 px-2"><span class="px-2 py-1 rounded text-xs ${statusColors[status]} text-black">${status}</span></td>
+          <td class="py-3 px-2"><button class="text-[#F97316] hover:underline text-xs">View</button></td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+
+    // Outages List
+    function generateOutagesList() {
+      const outagesList = document.getElementById('outages-list');
+      outagesList.innerHTML = '';
+      
+      for (let i = 0; i < 5; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        const startHour = randomInt(6, 18);
+        const duration = randomInt(1, 4);
+        
+        const outageItem = document.createElement('div');
+        outageItem.className = 'rounded-lg p-4 theme-transition';
+        outageItem.style.backgroundColor = 'var(--bg-primary)';
+        outageItem.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold" style="color: var(--text-primary);">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            <span class="px-2 py-1 rounded text-xs ${i === 0 ? 'bg-[#F97316] text-black' : 'bg-[#22D3EE] text-black'}">${i === 0 ? 'Today' : 'Scheduled'}</span>
+          </div>
+          <p class="text-sm" style="color: var(--text-secondary);">${formatTime(startHour, 0)} - ${formatTime(startHour + duration, 0)}</p>
+          <p class="text-xs mt-1" style="color: var(--text-muted);">Area: Zone ${randomInt(1, 5)}</p>
+        `;
+        outagesList.appendChild(outageItem);
+      }
+    }
+
+    // Cost Reducing Tips
+    function generateTips() {
+      const tips = [
+        { icon: 'fas fa-lightbulb', title: 'LED Lighting', desc: 'Switch to LED bulbs to save up to 75% on lighting costs', savings: '$12/month', color: '#FBBF24' },
+        { icon: 'fas fa-thermometer-half', title: 'Smart Thermostat', desc: 'Install a programmable thermostat to optimize heating/cooling', savings: '$18/month', color: '#22D3EE' },
+        { icon: 'fas fa-power-off', title: 'Standby Power', desc: 'Unplug devices when not in use to eliminate phantom loads', savings: '$8/month', color: '#F87171' },
+        { icon: 'fas fa-sun', title: 'Natural Light', desc: 'Use natural daylight during work hours when possible', savings: '$5/month', color: '#F97316' },
+        { icon: 'fas fa-wind', title: 'Air Sealing', desc: 'Seal air leaks around windows and doors', savings: '$15/month', color: '#A855F7' },
+        { icon: 'fas fa-clock', title: 'Off-Peak Usage', desc: 'Shift heavy usage to off-peak hours for lower rates', savings: '$10/month', color: '#22C55E' }
+      ];
+
+      const container = document.getElementById('tips-container');
+      container.innerHTML = '';
+
+      tips.forEach(tip => {
+        const tipCard = document.createElement('div');
+        tipCard.className = 'rounded-lg p-6 card-hover theme-transition shadow-card';
+        tipCard.style.backgroundColor = 'var(--bg-card)';
+        tipCard.innerHTML = `
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: ${tip.color}20">
+              <i class="${tip.icon} text-xl" style="color: ${tip.color}"></i>
+            </div>
+            <h3 class="font-semibold" style="color: var(--text-primary);">${tip.title}</h3>
+          </div>
+          <p class="text-sm mb-4" style="color: var(--text-secondary);">${tip.desc}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-[#22C55E] font-semibold">Save ${tip.savings}</span>
+            <button class="text-[#F97316] text-sm hover:underline">Learn More</button>
+          </div>
+        `;
+        container.appendChild(tipCard);
+      });
+    }
+
+    // Tariff Chart
+    function updateTariffChart() {
+      const chart = document.getElementById('tariff-chart');
+      chart.innerHTML = '';
+
+      const rates = [];
+      for (let i = 0; i < 12; i++) {
+        rates.push(0.08 + Math.random() * 0.12);
+      }
+
+      const width = 700;
+      const height = 180;
+      const step = width / 11;
+      const maxRate = Math.max(...rates);
+      const minRate = Math.min(...rates);
+      const range = maxRate - minRate || 1;
+
+      let pathD = '';
+      rates.forEach((rate, i) => {
+        const x = i * step;
+        const y = height - ((rate - minRate) / range) * 150 - 20;
+        if (i === 0) {
+          pathD += `M${x},${y}`;
+        } else {
+          pathD += ` L${x},${y}`;
+        }
+      });
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', pathD);
+      path.setAttribute('stroke', '#F97316');
+      path.setAttribute('stroke-width', '3');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+      chart.appendChild(path);
+
+      rates.forEach((rate, i) => {
+        const x = i * step;
+        const y = height - ((rate - minRate) / range) * 150 - 20;
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', '4');
+        circle.setAttribute('fill', '#F97316');
+        chart.appendChild(circle);
+      });
+
+      document.getElementById('current-rate').textContent = '$' + rates[new Date().getMonth()].toFixed(2);
+      document.getElementById('peak-rate').textContent = '$' + (maxRate + 0.05).toFixed(2);
+      document.getElementById('offpeak-rate').textContent = '$' + (minRate - 0.02).toFixed(2);
+    }
+
+    // Update Dashboard
+    function updateDashboard() {
+      updateInvoice();
+      renderConsumptionChart();
+      updateOutages();
+      updateCO2();
+      updateConsumptionBars();
+      updateAnnualExpense();
+    }
+
+    // Initialize
+    initTheme();
+    updateDashboard();
+    renderMeters();
+    generateInvoices();
+    generateOutagesList();
+    generateTips();
+    updateTariffChart();
+
+    // Auto-update
+    setInterval(updateDashboard, 3000);
+
+    // Navigation
+    const navButtons = document.querySelectorAll(".nav-btn");
+    const sections = {
+      dashboard: document.getElementById("dashboard-section"),
+      invoices: document.getElementById("invoices-section"),
+      "planned-outages": document.getElementById("planned-outages-section"),
+      "tariff-tracker": document.getElementById("tariff-tracker-section"),
+      "cost-reducing": document.getElementById("cost-reducing-section"),
+      service: document.getElementById("service-section"),
+    };
+
+    function showSection(sectionKey) {
+      Object.entries(sections).forEach(([key, section]) => {
+        if (key === sectionKey) {
+          section.classList.remove("hidden");
+        } else {
+          section.classList.add("hidden");
+        }
+      });
+      
+      navButtons.forEach(btn => {
+        if (btn.dataset.section === sectionKey) {
+          btn.classList.add("bg-[#F97316]", "text-white");
+          btn.style.color = "white";
+          btn.setAttribute("aria-current", "page");
+        } else {
+          btn.classList.remove("bg-[#F97316]", "text-white");
+          btn.style.color = "var(--text-secondary)";
+          btn.removeAttribute("aria-current");
+        }
+      });
+
+      // Close mobile menu
+      sidebar.classList.remove('open');
+      mobileOverlay.classList.remove('show');
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        showSection(btn.dataset.section);
+      });
+    });
+
+    document.getElementById("nav-Wattwatch").addEventListener("click", () => {
+      showSection("dashboard");
+    });
+
+    // Time Filter Buttons
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.time-filter-btn').forEach(b => {
+          b.classList.remove('bg-[#4338CA]', 'text-white', 'active');
+          b.style.backgroundColor = 'transparent';
+        });
+        btn.classList.add('bg-[#4338CA]', 'text-white', 'active');
+        btn.style.backgroundColor = '#4338CA';
+        updateAnnualExpense();
+      });
+    });
+
+    // Add Meter Modal
+    const addMeterBtn = document.getElementById("add-meter-btn");
+    const addMeterModal = document.getElementById("add-meter-modal");
+    const addMeterForm = document.getElementById("add-meter-form");
+    const cancelAddMeterBtn = document.getElementById("cancel-add-meter");
+    const meterNameInput = document.getElementById("meter-name");
+
+    addMeterBtn.addEventListener("click", () => {
+      meterNameInput.value = "";
+      addMeterModal.classList.remove("hidden");
+      meterNameInput.focus();
+    });
+
+    cancelAddMeterBtn.addEventListener("click", () => {
+      addMeterModal.classList.add("hidden");
+    });
+
+    addMeterForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const name = meterNameInput.value.trim();
+      if (name) {
+        meters.push({ name, active: true });
+        renderMeters();
+        addMeterModal.classList.add("hidden");
+        showToast('Meter added successfully!');
+      }
+    });
+
+    addMeterModal.addEventListener("click", e => {
+      if (e.target === addMeterModal) {
+        addMeterModal.classList.add("hidden");
+      }
+    });
+
+    // Payment Modal
+    const payBillBtn = document.getElementById("pay-bill-btn");
+    const paymentModal = document.getElementById("payment-modal");
+    const cancelPaymentBtn = document.getElementById("cancel-payment");
+    const paymentForm = document.getElementById("payment-form");
+
+    payBillBtn.addEventListener("click", () => {
+      paymentModal.classList.remove("hidden");
+    });
+
+    cancelPaymentBtn.addEventListener("click", () => {
+      paymentModal.classList.add("hidden");
+    });
+
+    paymentForm.addEventListener("submit", e => {
+      e.preventDefault();
+      paymentModal.classList.add("hidden");
+      showToast('Payment processed successfully!');
+    });
+
+    paymentModal.addEventListener("click", e => {
+      if (e.target === paymentModal) {
+        paymentModal.classList.add("hidden");
+      }
+    });
+
+    // Support Form
+    document.getElementById("support-form").addEventListener("submit", e => {
+      e.preventDefault();
+      showToast('Support request submitted!');
+      e.target.reset();
+    });
+
+    // Year Select
+    document.getElementById("year-select").addEventListener("change", () => {
+      updateAnnualExpense();
+    });
+
+    // Initialize first section
+    showSection("dashboard");
+  </script>
+</body>
+</html>
