@@ -6,4 +6,4 @@
 
 ---
 
-deployed link : eco-byte-github-io.vercel.app
+deployed link : [Tap to view](eco-byte-github-io.vercel.app)
